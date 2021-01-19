@@ -1,3 +1,6 @@
+from hex_board_graph import HexBoardGraph
+
+
 class BoardType:
     TRIANGLE = 1
     DIAMOND = 2
@@ -12,6 +15,7 @@ class Board:
         self.neighbour_dict = {}
         self.generate_board()
         self.generate_neighbours()
+        print(self.neighbour_dict)
 
     def generate_board(self):
         """
@@ -39,7 +43,6 @@ class Board:
             for i in range(self.size):
                 self.board.append([(j + i*self.size, (i, j))
                                    for j in range(self.size)])
-                print(self.board[i])
 
     def generate_neighbours(self):
 
@@ -83,5 +86,9 @@ class Board:
                             valid_neighbours.append(index)
                     self.neighbour_dict[(row, col)] = valid_neighbours
 
+    def drawGraph(self):
+        self.graph = HexBoardGraph(self.neighbour_dict, self.board)
 
-test1 = Board(BoardType.DIAMOND, 4)
+
+test1 = Board(BoardType.TRIANGLE, 6)
+test1.drawGraph()
