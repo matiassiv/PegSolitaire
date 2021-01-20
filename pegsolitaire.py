@@ -11,7 +11,7 @@ class Peg:
     JUMPED_OVER = 4 #Only for visualisation
 
 class PegBoard(Board):
-    def __init__(self, board_type, size, empty_start_pegs = [(0,0)]):
+    def __init__(self, board_type, size, empty_start_pegs = [(0,0)], graphing_freq = 1):
         super().__init__(board_type, size)  
         self.graph = HexBoardGraph(self.neighbour_dict, self.board, self.board_type)      
 
@@ -19,8 +19,10 @@ class PegBoard(Board):
         for peg in empty_start_pegs:
             self.peghole_status[peg] = Peg.EMPTY
         
+        self.graphing_freq = graphing_freq
         self.game_end = False
         self.legal_moves = self.generate_legal_moves()
+        self.init_graph()
         self.display_graph()
 
         self.display_board_state()
@@ -70,23 +72,49 @@ class PegBoard(Board):
 
         self.legal_moves = self.generate_legal_moves()
         self.display_board_state()
-        self.display_graph()
+        self.update_graph()
     
 
     """Display methods and visualisation"""
+
+    def init_graph(self):
+        plt.ion()
+        self.display_graph()
+        plt.show()
+        plt.pause(self.graphing_freq)
+    
+    def update_graph(self):
+        plt.clf()
+        self.display_graph()
+        plt.pause(self.graphing_freq)
 
     def display_board_state(self):
         #Print peghole status
         for row in self.board:
             status = [self.peghole_status[coord] for coord in row]
-            print(status)
+            #print(status)
         #print legal moves
         for i, move in enumerate(self.legal_moves):
             print(i, move)
     
     def display_graph(self):
-        nx.draw(self.graph.graph, pos=self.graph.pos, node_color=self.get_node_colours())
-        plt.show()
+        nx.draw(
+            self.graph.graph, 
+            pos=self.graph.pos, 
+            node_color=self.get_node_colours(), 
+            node_size=self.get_node_sizes()
+            )
+    
+    def get_node_sizes(self):
+        sizes = []
+        for node in self.graph.graph:
+            #Make holes slightly smaller than pegs, to better simulate real life peg solitaire
+            if self.peghole_status[node] == Peg.EMPTY:
+                size = 120
+            else:
+                size = 200
+            sizes.append(size)  
+        return sizes          
     
     def get_node_colours(self):
         colours = []
@@ -108,7 +136,7 @@ class PegBoard(Board):
 
 
 
-test1 = PegBoard(BoardType.DIAMOND, 8 )
+test1 = PegBoard(BoardType.TRIANGLE, 5 )
 
 while True:
     move = input("Select your move: ")
