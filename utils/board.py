@@ -39,12 +39,12 @@ class Board:
             for row in range(self.size):
                 for col in range(row+1):
                     triangle_neighbour_indices = [
-                        (row - 1, col),             #UP
-                        (row, col + 1),             #RIGHT
-                        (row + 1, col + 1),         #DOWN_RIGHT
-                        (row + 1, col),             #DOWN
-                        (row, col - 1),             #LEFT
-                        (row - 1, col - 1)          #UP_LEFT
+                        (row - 1, col),  # UP
+                        (row, col + 1),  # RIGHT
+                        (row + 1, col + 1),  # DOWN_RIGHT
+                        (row + 1, col),  # DOWN
+                        (row, col - 1),  # LEFT
+                        (row - 1, col - 1)  # UP_LEFT
                     ]
                     valid_neighbours = {}
                     for i, index in enumerate(triangle_neighbour_indices):
@@ -54,17 +54,17 @@ class Board:
 
                     self.neighbour_dict[(row, col)] = valid_neighbours
 
-        else: #BoardType.DIAMOND
+        else:  # BoardType.DIAMOND
 
             for row in range(self.size):
                 for col in range(self.size):
                     diamond_neighbour_indices = [
-                        (row - 1, col),             #UP
-                        (row - 1, col + 1),         #UP_RIGHT
-                        (row, col + 1),             #RIGHT
-                        (row + 1, col),             #DOWN
-                        (row + 1, col - 1),         #DOWN_LEFT
-                        (row, col - 1)              #LEFT   
+                        (row - 1, col),  # UP
+                        (row - 1, col + 1),  # UP_RIGHT
+                        (row, col + 1),  # RIGHT
+                        (row + 1, col),  # DOWN
+                        (row + 1, col - 1),  # DOWN_LEFT
+                        (row, col - 1)  # LEFT
                     ]
 
                     valid_neighbours = {}
