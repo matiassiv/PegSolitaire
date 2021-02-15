@@ -1,16 +1,18 @@
-
+from Learner.critic_table import CriticTable
 
 class Critic:
     def __init__(self, critic="table", learning_rate=0.02, discount_factor=0.95, trace_decay=0.8):
-        if critic =
+        if critic == "table":
+            self.critic = CriticTable(learning_rate, discount_factor, trace_decay)
 
     def reset_eligibilities(self):
-        pass
-
+        self.critic.reset_eligibilities()
+    
     def handle_state(self, state):
-        pass
+        self.critic.handle_state(state)
 
     def calculate_temp_diff(self, new_state, curr_state, reinforcement):
-        pass
+        return self.critic.calculate_temp_diff(new_state, curr_state, reinforcement)
     
-    def update_value_and_eligibility(self, SAP_trace, temporal_difference)
+    def update_value_and_eligibility(self, SAP_trace, temporal_difference):
+        self.critic.update_value_and_eligibility(SAP_trace, temporal_differences)

@@ -8,8 +8,8 @@ sys.path.append(parentdir)
 try:
     from pegsolitaire import PegBoard, Peg
     from utils.board import BoardType
-    from critic import Critic
-    from actor import Actor
+    from learner.critic import Critic
+    from learner.actor import Actor
 except:
     print("Couldn't handle imports")
 
