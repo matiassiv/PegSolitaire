@@ -1,18 +1,24 @@
-from Learner.critic_table import CriticTable
+try:
+    from critic_table import CriticTable
+except:
+    print("error in critic import")
+
 
 class Critic:
     def __init__(self, critic="table", learning_rate=0.02, discount_factor=0.95, trace_decay=0.8):
         if critic == "table":
-            self.critic = CriticTable(learning_rate, discount_factor, trace_decay)
+            self.critic = CriticTable(
+                learning_rate, discount_factor, trace_decay)
 
     def reset_eligibilities(self):
         self.critic.reset_eligibilities()
-    
+
     def handle_state(self, state):
         self.critic.handle_state(state)
 
     def calculate_temp_diff(self, new_state, curr_state, reinforcement):
         return self.critic.calculate_temp_diff(new_state, curr_state, reinforcement)
-    
+
     def update_value_and_eligibility(self, SAP_trace, temporal_difference):
-        self.critic.update_value_and_eligibility(SAP_trace, temporal_differences)
+        self.critic.update_value_and_eligibility(
+            SAP_trace, temporal_difference)

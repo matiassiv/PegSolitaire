@@ -29,7 +29,7 @@ class PegBoard(Board):
             self.generate_legal_moves()
             self.init_graph()
             self.display_graph()
-            self.display_board_state()
+            # self.display_board_state()
         # self.legal_moves
         # generate_legal_moves
 
@@ -81,7 +81,7 @@ class PegBoard(Board):
 
         #self.legal_moves = self.generate_legal_moves()
         if self.display_game:
-            self.display_board_state()
+            # self.display_board_state()
             self.update_graph()
 
     def get_remaining_pegs(self):
@@ -99,12 +99,12 @@ class PegBoard(Board):
         legal_moves = self.generate_legal_moves()
         if len(legal_moves) == 0:
             remaining_pegs = self.get_remaining_pegs()
-            reinforcement += 1/remaining_pegs
             # Can give extra reinforcement for wins
             if remaining_pegs == 1:
-                reinforcement += 1
+                reinforcement += 100
             else:
-                reinforcement += -1
+                reinforcement -= 100
+
         return reinforcement
 
     def get_board_state(self):

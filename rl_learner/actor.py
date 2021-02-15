@@ -1,6 +1,8 @@
 import numpy as np
 import random
 
+random.seed(1)
+
 
 class Actor:
     def __init__(self, learning_rate=0.05, e_greedy=0.5, trace_decay=0.8, discount_factor=0.95,  num_episodes=50):
@@ -21,28 +23,29 @@ class Actor:
         # If we do a run outside of training and the model encounters
         # a state it has not yet seen
         if state not in self.policy:
+            print("Random")
             return random.choice(legal_moves)
 
         if np.random.rand() >= self.e_greedy:
             # If random number is bigger than e_greedy, we return the best policy move
-            return max(self.policy[state], key=(lambda action: self.policy[state][action])
+            return max(self.policy[state], key=(lambda action: self.policy[state][action]))
 
         # Else return random move
-        return random.sample(list(self.policy[state]))
+        return random.choice(list(self.policy[state]))
 
     def reset_eligibilities(self):
 
         for state in self.eligibilities:
             for action in self.eligibilities[state]:
-                self.eligibilities[state][action]=0
+                self.eligibilities[state][action] = 0
 
     # Add a state-action pair to policy
     def add_SAP(self, state, action):
 
         if state not in self.policy:
-            self.policy[state]={}
+            self.policy[state] = {}
 
-        self.policy[state][action]=0
+        self.policy[state][action] = 0
 
     # Add possible actions to policy for a given state
     def handle_state(self, state, legal_moves):
@@ -56,20 +59,21 @@ class Actor:
 
     def update_policy(self, state, action, temporal_difference):
         self.policy[state][action] += \
-            self.learning_rate * temporal_difference * self.eligibilities[state][action]
+            self.learning_rate * temporal_difference * \
+            self.eligibilities[state][action]
 
     def update_eligibility(self, state, action, decay_version=False):
         if state not in self.eligibilities:
             self.eligibilities[state] = {}
-        
+
         # If we're updating the last SAP, we set eligibility to 1
         # else we decay already set eligibilities
         if not decay_version:
             self.eligibilities[state][action] = 1
         else:
-            self.eligibilities[state][action] = \
-                self.eligibilities[state][action] * self.discount_factor * self.trace_decay
-            
+            self.eligibilities[state][action] = self.eligibilities[state][action] * \
+                self.discount_factor * self.trace_decay
+
     def update_policy_and_eligibility(self, SAP_trace, temporal_difference):
         """
         Takes in the trace of states of actions of an active game and
