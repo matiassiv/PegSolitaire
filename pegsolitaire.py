@@ -101,9 +101,9 @@ class PegBoard(Board):
             remaining_pegs = self.get_remaining_pegs()
             # Can give extra reinforcement for wins
             if remaining_pegs == 1:
-                reinforcement += 100
+                reinforcement += 1
             else:
-                reinforcement -= 100
+                reinforcement -= 1
 
         return reinforcement
 
@@ -113,6 +113,7 @@ class PegBoard(Board):
     """Display methods and visualisation"""
 
     def init_graph(self):
+        plt.clf()
         plt.ion()
         self.display_graph()
         plt.show()

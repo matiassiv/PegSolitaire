@@ -4,8 +4,10 @@ import sys
 import random
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 random.seed(1)
+np.random.seed(1)
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
@@ -40,17 +42,30 @@ class Learner:
             num_episodes=2000,
             game_settings={"board_type": BoardType.TRIANGLE, "size": 6,
                            "empty_start_pegs": [(0, 0)], "graphing_freq": 0.4, "display_game": False},
-            critic_settings={"learning_rate": 0.03,
-                             "discount_factor": 0.95, "trace_decay": 0.8},
+            critic_settings={"critic_type": "table", "learning_rate": 0.03,
+                             "discount_factor": 0.95, "trace_decay": 0.8, "layer_sizes": [20, 10]},
             actor_settings={"learning_rate": 0.03, "e_greedy": 0.5,
-                            "trace_decay": 0.8, "discount_factor": 0.95}
+                            "trace_decay": 0.8, "discount_factor": 0.95
+                            }
     ):
         self.num_episodes = num_episodes
         self.game_settings = game_settings
+
+        # Number of input nodes to network must be number of pegholes
+        if game_settings["board_type"] == BoardType.TRIANGLE:
+            size = game_settings["size"]
+            input_nodes = size * (size + 1) // 2
+        else:
+            size = game_settings["size"]
+            input_nodes = size * size
+
         self.critic = Critic(
+            critic_type=critic_settings["critic_type"],
             learning_rate=critic_settings["learning_rate"],
             discount_factor=critic_settings["discount_factor"],
-            trace_decay=critic_settings["trace_decay"]
+            trace_decay=critic_settings["trace_decay"],
+            input_nodes=input_nodes,
+            layer_sizes=critic_settings["layer_sizes"]
         )
         self.actor = Actor(
             learning_rate=actor_settings["learning_rate"],
@@ -67,10 +82,11 @@ class Learner:
 
         # Iterate over predefined number of episodes
         for episode in range(self.num_episodes):
-
+            #start_time = time.time()
             # Initialise game, and reset eligibilities of actor/critic to 0
             curr_game, curr_state, legal_moves = self.init_game()
             self.actor.reset_eligibilities()
+            self.critic.reset_eligibilities()
 
             # Add SAP to actor policy and state to critic
             self.actor.handle_state(curr_state, legal_moves)
@@ -91,7 +107,7 @@ class Learner:
                 # Critic must calculate temporal difference
                 temporal_difference = self.critic.calculate_temp_diff(
                     new_state, curr_state, reinforcement)
-
+                #print("Temp_diff:", temporal_difference)
                 # Update eligibility trace, then update critic value and actor policy
                 self.critic.update_value_and_eligibility(
                     SAP_trace, temporal_difference)
@@ -106,6 +122,8 @@ class Learner:
 
             remaining.append(curr_game.get_remaining_pegs())
             self.actor.update_greediness()
+            #end_time = time.time()
+            #print("TIME episode " + str(episode)+":", end_time - start_time)
         return remaining
 
     def perform_move(self, current_state, current_game, selected_move):
@@ -189,25 +207,145 @@ class Learner:
 
 if __name__ == "__main__":
 
+    # For ANN we need to set learning rate much lower than for actor
     settings = {
-        "num_episodes": 2000,
-        "game_settings": {"board_type": BoardType.TRIANGLE, "size": 6,
-                          "empty_start_pegs": [(0, 0)], "graphing_freq": 0.4, "display_game": False},
-        "critic_settings": {"learning_rate": 0.03,
-                            "discount_factor": 0.95, "trace_decay": 0.8},
-        "actor_settings": {"learning_rate": 0.03, "e_greedy": 0.5,
-                           "trace_decay": 0.8, "discount_factor": 0.95}
+        "num_episodes": 900,
+        "game_settings": {"board_type": BoardType.TRIANGLE, "size": 5,
+                          "empty_start_pegs": [(2, 1)], "graphing_freq": 0.4, "display_game": False},
+        "critic_settings": {"critic_type": "ann", "learning_rate": 0.001,
+                            "discount_factor": 0.88, "trace_decay": 0.8, "layer_sizes": [16, 8]},
+        "actor_settings": {"learning_rate": 0.05, "e_greedy": 0.5,
+                           "trace_decay": 0.8, "discount_factor": 0.88}
+    }
+    settings_2 = {
+        "num_episodes": 900,
+        "game_settings": {"board_type": BoardType.TRIANGLE, "size": 5,
+                          "empty_start_pegs": [(2, 1)], "graphing_freq": 0.4, "display_game": False},
+        "critic_settings": {"critic_type": "table", "learning_rate": 0.01,
+                            "discount_factor": 0.88, "trace_decay": 0.8, "layer_sizes": [16, 8]},
+        "actor_settings": {"learning_rate": 0.05, "e_greedy": 0.5,
+                           "trace_decay": 0.8, "discount_factor": 0.88}
+    }
+    settings_3 = {
+        "num_episodes": 900,
+        "game_settings": {"board_type": BoardType.DIAMOND, "size": 4,
+                          "empty_start_pegs": [(2, 1)], "graphing_freq": 0.4, "display_game": False},
+        "critic_settings": {"critic_type": "ann", "learning_rate": 0.001,
+                            "discount_factor": 0.88, "trace_decay": 0.8, "layer_sizes": [16, 8]},
+        "actor_settings": {"learning_rate": 0.05, "e_greedy": 0.5,
+                           "trace_decay": 0.8, "discount_factor": 0.88}
     }
 
+    settings_4 = {
+        "num_episodes": 900,
+        "game_settings": {"board_type": BoardType.DIAMOND, "size": 4,
+                          "empty_start_pegs": [(2, 1)], "graphing_freq": 0.4, "display_game": False},
+        "critic_settings": {"critic_type": "table", "learning_rate": 0.01,
+                            "discount_factor": 0.88, "trace_decay": 0.8, "layer_sizes": [16, 8]},
+        "actor_settings": {"learning_rate": 0.05, "e_greedy": 0.5,
+                           "trace_decay": 0.8, "discount_factor": 0.88}
+    }
+
+    settings_5 = {
+        "num_episodes": 900,
+        "game_settings": {"board_type": BoardType.TRIANGLE, "size": 7,
+                          "empty_start_pegs": [(2, 1)], "graphing_freq": 0.4, "display_game": False},
+        "critic_settings": {"critic_type": "table", "learning_rate": 0.001,
+                            "discount_factor": 0.88, "trace_decay": 0.8, "layer_sizes": [16, 8]},
+        "actor_settings": {"learning_rate": 0.05, "e_greedy": 0.5,
+                           "trace_decay": 0.8, "discount_factor": 0.88}
+    }
+
+    start_time = time.time()
     l = Learner(settings["num_episodes"], settings["game_settings"],
                 settings["critic_settings"], settings["actor_settings"])
     performance = l.train()
     x_vals = np.arange(len(performance))
 
     plt.plot(x_vals, performance)
-    plt.show()
+    plt.savefig("ANN_triangle_5.png")
+    plt.clf()
+    end_time = time.time()
+    print(settings["num_episodes"],
+          " episodes learnt in time:", end_time - start_time)
+
+    start_time = time.time()
+    l2 = Learner(settings_2["num_episodes"], settings_2["game_settings"],
+                 settings_2["critic_settings"], settings_2["actor_settings"])
+    performance = l2.train()
+    x_vals = np.arange(len(performance))
+
+    plt.plot(x_vals, performance)
+    plt.savefig("Table_triangle_5.png")
+    plt.clf()
+    end_time = time.time()
+    print(settings["num_episodes"],
+          " episodes learnt in time:", end_time - start_time)
+
+    start_time = time.time()
+    l3 = Learner(settings_3["num_episodes"], settings_3["game_settings"],
+                 settings_3["critic_settings"], settings_3["actor_settings"])
+    performance = l3.train()
+    x_vals = np.arange(len(performance))
+
+    plt.plot(x_vals, performance)
+    plt.savefig("ANN_Diamond_4.png")
+    plt.clf()
+    end_time = time.time()
+    print(settings["num_episodes"],
+          " episodes learnt in time:", end_time - start_time)
+
+    start_time = time.time()
+    l4 = Learner(settings_4["num_episodes"], settings_4["game_settings"],
+                 settings_4["critic_settings"], settings_4["actor_settings"])
+    performance = l4.train()
+    x_vals = np.arange(len(performance))
+
+    plt.plot(x_vals, performance)
+    plt.savefig("Table_Diamond_4.png")
+    plt.clf()
+    end_time = time.time()
+    print(settings["num_episodes"],
+          " episodes learnt in time:", end_time - start_time)
+
+    start_time = time.time()
+    l5 = Learner(settings_5["num_episodes"], settings_5["game_settings"],
+                 settings_5["critic_settings"], settings_5["actor_settings"])
+    performance = l5.train()
+    x_vals = np.arange(len(performance))
+
+    plt.plot(x_vals, performance)
+    plt.savefig("Reasonable_behaviour.png")
+    plt.clf()
+    end_time = time.time()
+    print(settings["num_episodes"],
+          " episodes learnt in time:", end_time - start_time)
 
     remaining, SAP_trace = l.test()
+
+    print("Remaining pegs:", remaining)
+    for SAP in SAP_trace:
+        print(SAP)
+
+    remaining, SAP_trace = l2.test()
+
+    print("Remaining pegs:", remaining)
+    for SAP in SAP_trace:
+        print(SAP)
+
+    remaining, SAP_trace = l3.test()
+
+    print("Remaining pegs:", remaining)
+    for SAP in SAP_trace:
+        print(SAP)
+
+    remaining, SAP_trace = l4.test()
+
+    print("Remaining pegs:", remaining)
+    for SAP in SAP_trace:
+        print(SAP)
+
+    remaining, SAP_trace = l5.test()
 
     print("Remaining pegs:", remaining)
     for SAP in SAP_trace:
