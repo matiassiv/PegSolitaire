@@ -82,7 +82,7 @@ class Learner:
 
         # Iterate over predefined number of episodes
         for episode in range(self.num_episodes):
-            #start_time = time.time()
+            # start_time = time.time()
             # Initialise game, and reset eligibilities of actor/critic to 0
             curr_game, curr_state, legal_moves = self.init_game()
             self.actor.reset_eligibilities()
@@ -107,7 +107,7 @@ class Learner:
                 # Critic must calculate temporal difference
                 temporal_difference = self.critic.calculate_temp_diff(
                     new_state, curr_state, reinforcement)
-                #print("Temp_diff:", temporal_difference)
+                # print("Temp_diff:", temporal_difference)
                 # Update eligibility trace, then update critic value and actor policy
                 self.critic.update_value_and_eligibility(
                     SAP_trace, temporal_difference)
@@ -122,8 +122,8 @@ class Learner:
 
             remaining.append(curr_game.get_remaining_pegs())
             self.actor.update_greediness()
-            #end_time = time.time()
-            #print("TIME episode " + str(episode)+":", end_time - start_time)
+            # end_time = time.time()
+            # print("TIME episode " + str(episode)+":", end_time - start_time)
         return remaining
 
     def perform_move(self, current_state, current_game, selected_move):
@@ -146,11 +146,11 @@ class Learner:
 
     def generate_internal_board_rep(self, board_state):
         """
-        Current implementation bases itself on using board state as key in 
+        Current implementation bases itself on using board state as key in
         the policy and value dictionaries for critic and actor. Thus, we need the
         board state to be immutable. We can accomplish this by converting the board
         state to a bitstring, where "1"s represent pegs and "0"s represent holes. The bitstring
-        is constructed in top-down fashion, so coordinate (0,0) is the first bit, (1,0) is the 
+        is constructed in top-down fashion, so coordinate (0,0) is the first bit, (1,0) is the
         second, (1,1) is the third and so on... The parameter board_state is a dictionary of the
         current status for each peghole. Additionally, a bitstring is easy to use as input for an NN.
         """
@@ -206,147 +206,158 @@ class Learner:
 
 
 if __name__ == "__main__":
-
-    # For ANN we need to set learning rate much lower than for actor
-    settings = {
-        "num_episodes": 900,
-        "game_settings": {"board_type": BoardType.TRIANGLE, "size": 5,
-                          "empty_start_pegs": [(2, 1)], "graphing_freq": 0.4, "display_game": False},
-        "critic_settings": {"critic_type": "ann", "learning_rate": 0.001,
-                            "discount_factor": 0.88, "trace_decay": 0.8, "layer_sizes": [16, 8]},
-        "actor_settings": {"learning_rate": 0.05, "e_greedy": 0.5,
-                           "trace_decay": 0.8, "discount_factor": 0.88}
-    }
-    settings_2 = {
-        "num_episodes": 900,
-        "game_settings": {"board_type": BoardType.TRIANGLE, "size": 5,
-                          "empty_start_pegs": [(2, 1)], "graphing_freq": 0.4, "display_game": False},
-        "critic_settings": {"critic_type": "table", "learning_rate": 0.01,
-                            "discount_factor": 0.88, "trace_decay": 0.8, "layer_sizes": [16, 8]},
-        "actor_settings": {"learning_rate": 0.05, "e_greedy": 0.5,
-                           "trace_decay": 0.8, "discount_factor": 0.88}
-    }
-    settings_3 = {
-        "num_episodes": 900,
-        "game_settings": {"board_type": BoardType.DIAMOND, "size": 4,
-                          "empty_start_pegs": [(2, 1)], "graphing_freq": 0.4, "display_game": False},
-        "critic_settings": {"critic_type": "ann", "learning_rate": 0.001,
-                            "discount_factor": 0.88, "trace_decay": 0.8, "layer_sizes": [16, 8]},
-        "actor_settings": {"learning_rate": 0.05, "e_greedy": 0.5,
-                           "trace_decay": 0.8, "discount_factor": 0.88}
+    # Settings for Triangle board size 5, critic_table
+    settings_triangle_table = {
+        "num_episodes": 600,
+        "game_settings": {
+            "board_type": BoardType.TRIANGLE,
+            "size": 5,
+            "empty_start_pegs": [(2, 1)],
+            "graphing_freq": 0.4,
+            "display_game": False
+        },
+        "critic_settings": {
+            "critic_type": "table",
+            "learning_rate": 0.01,
+            "discount_factor": 0.9,
+            "trace_decay": 0.8,
+            "layer_sizes": [10]
+        },
+        "actor_settings": {
+            "learning_rate": 0.05,
+            "e_greedy": 0.5,
+            "trace_decay": 0.8,
+            "discount_factor": 0.9
+        }
     }
 
-    settings_4 = {
-        "num_episodes": 900,
-        "game_settings": {"board_type": BoardType.DIAMOND, "size": 4,
-                          "empty_start_pegs": [(2, 1)], "graphing_freq": 0.4, "display_game": False},
-        "critic_settings": {"critic_type": "table", "learning_rate": 0.01,
-                            "discount_factor": 0.88, "trace_decay": 0.8, "layer_sizes": [16, 8]},
-        "actor_settings": {"learning_rate": 0.05, "e_greedy": 0.5,
-                           "trace_decay": 0.8, "discount_factor": 0.88}
+    # Settings for Triangle board size 5, critic_ANN
+    # For critic_ANN we need to set learning rate much lower than for actor
+    settings_triangle_ann = {
+        "num_episodes": 600,
+        "game_settings": {
+            "board_type": BoardType.TRIANGLE,
+            "size": 5,
+            "empty_start_pegs": [(2, 1)],
+            "graphing_freq": 0.4,
+            "display_game": False
+        },
+        "critic_settings": {
+            "critic_type": "ann",
+            "learning_rate": 0.0008,
+            "discount_factor": 0.9,
+            "trace_decay": 0.8,
+            "layer_sizes": [15, 8]
+        },
+        "actor_settings": {
+            "learning_rate": 0.03,
+            "e_greedy": 0.5,
+            "trace_decay": 0.8,
+            "discount_factor": 0.9
+        }
     }
 
-    settings_5 = {
-        "num_episodes": 900,
-        "game_settings": {"board_type": BoardType.TRIANGLE, "size": 7,
-                          "empty_start_pegs": [(2, 1)], "graphing_freq": 0.4, "display_game": False},
-        "critic_settings": {"critic_type": "table", "learning_rate": 0.001,
-                            "discount_factor": 0.88, "trace_decay": 0.8, "layer_sizes": [16, 8]},
-        "actor_settings": {"learning_rate": 0.05, "e_greedy": 0.5,
-                           "trace_decay": 0.8, "discount_factor": 0.88}
+    # Settings for Diamond board size 4, critic_table
+    settings_diamond_table = {
+        "num_episodes": 600,
+        "game_settings": {
+            "board_type": BoardType.DIAMOND,
+            "size": 4,
+            "empty_start_pegs": [(2, 1)],
+            "graphing_freq": 0.4,
+            "display_game": False
+        },
+        "critic_settings": {
+            "critic_type": "table",
+            "learning_rate": 0.01,
+            "discount_factor": 0.9,
+            "trace_decay": 0.8,
+            "layer_sizes": [10]
+        },
+        "actor_settings": {
+            "learning_rate": 0.05,
+            "e_greedy": 0.5,
+            "trace_decay": 0.8,
+            "discount_factor": 0.9
+        }
     }
 
-    start_time = time.time()
-    l = Learner(settings["num_episodes"], settings["game_settings"],
-                settings["critic_settings"], settings["actor_settings"])
-    performance = l.train()
-    x_vals = np.arange(len(performance))
+    # Settings for Diamond board size 4, critic_ann
+    settings_diamond_ann = {
+        "num_episodes": 600,
+        "game_settings": {
+            "board_type": BoardType.DIAMOND,
+            "size": 4,
+            "empty_start_pegs": [(2, 1)],
+            "graphing_freq": 0.4,
+            "display_game": False
+        },
+        "critic_settings": {
+            "critic_type": "ann",
+            "learning_rate": 0.001,
+            "discount_factor": 0.9,
+            "trace_decay": 0.8,
+            "layer_sizes": [15, 8]
+        },
+        "actor_settings": {
+            "learning_rate": 0.05,
+            "e_greedy": 0.5,
+            "trace_decay": 0.8,
+            "discount_factor": 0.9
+        }
+    }
 
-    plt.plot(x_vals, performance)
-    plt.savefig("ANN_triangle_5.png")
-    plt.clf()
-    end_time = time.time()
-    print(settings["num_episodes"],
-          " episodes learnt in time:", end_time - start_time)
+    # Settings reviewer can adjust
+    settings_reasonable_behaviour = {
+        "num_episodes": 500,
+        "game_settings": {
+            "board_type": BoardType.TRIANGLE,
+            "size": 5,
+            "empty_start_pegs": [(2, 1)],
+            "graphing_freq": 0.4,
+            "display_game": False
+        },
+        "critic_settings": {
+            "critic_type": "table",
+            "learning_rate": 0.01,
+            "discount_factor": 0.88,
+            "trace_decay": 0.8,
+            "layer_sizes": [15, 20, 30, 5, 1]  # Sizes of hidden layers
+        },
+        "actor_settings": {
+            "learning_rate": 0.05,
+            "e_greedy": 0.5,  # Decays with a flat rate proportional to num_episodes
+            "trace_decay": 0.8,
+            "discount_factor": 0.88}
+    }
 
-    start_time = time.time()
-    l2 = Learner(settings_2["num_episodes"], settings_2["game_settings"],
-                 settings_2["critic_settings"], settings_2["actor_settings"])
-    performance = l2.train()
-    x_vals = np.arange(len(performance))
+    # Select which settings to use
+    settings_tuple = (settings_triangle_table, settings_triangle_ann,
+                      settings_diamond_table, settings_diamond_ann)
 
-    plt.plot(x_vals, performance)
-    plt.savefig("Table_triangle_5.png")
-    plt.clf()
-    end_time = time.time()
-    print(settings["num_episodes"],
-          " episodes learnt in time:", end_time - start_time)
+    # Uncomment below to run all 4 cases
+    """
+    for i, settings in enumerate(settings_tuple):
+        start_time = time.time()
+        l = Learner(settings["num_episodes"], settings["game_settings"],
+                    settings["critic_settings"], settings["actor_settings"])
+        performance = l.train()
+        x_vals = np.arange(len(performance))
 
-    start_time = time.time()
-    l3 = Learner(settings_3["num_episodes"], settings_3["game_settings"],
-                 settings_3["critic_settings"], settings_3["actor_settings"])
-    performance = l3.train()
-    x_vals = np.arange(len(performance))
+        plt.plot(x_vals, performance)
+        plt.ylabel("Remaining pegs")
+        plt.xlabel("Episodes")
+        plt.title(settings["critic_settings"]["critic_type"])
+        plt.savefig(str(i)+".png")
+        plt.clf()
 
-    plt.plot(x_vals, performance)
-    plt.savefig("ANN_Diamond_4.png")
-    plt.clf()
-    end_time = time.time()
-    print(settings["num_episodes"],
-          " episodes learnt in time:", end_time - start_time)
-
-    start_time = time.time()
-    l4 = Learner(settings_4["num_episodes"], settings_4["game_settings"],
-                 settings_4["critic_settings"], settings_4["actor_settings"])
-    performance = l4.train()
-    x_vals = np.arange(len(performance))
-
-    plt.plot(x_vals, performance)
-    plt.savefig("Table_Diamond_4.png")
-    plt.clf()
-    end_time = time.time()
-    print(settings["num_episodes"],
-          " episodes learnt in time:", end_time - start_time)
-
-    start_time = time.time()
-    l5 = Learner(settings_5["num_episodes"], settings_5["game_settings"],
-                 settings_5["critic_settings"], settings_5["actor_settings"])
-    performance = l5.train()
-    x_vals = np.arange(len(performance))
-
-    plt.plot(x_vals, performance)
-    plt.savefig("Reasonable_behaviour.png")
-    plt.clf()
-    end_time = time.time()
-    print(settings["num_episodes"],
-          " episodes learnt in time:", end_time - start_time)
-
-    remaining, SAP_trace = l.test()
-
-    print("Remaining pegs:", remaining)
-    for SAP in SAP_trace:
-        print(SAP)
-
-    remaining, SAP_trace = l2.test()
-
-    print("Remaining pegs:", remaining)
-    for SAP in SAP_trace:
-        print(SAP)
-
-    remaining, SAP_trace = l3.test()
-
-    print("Remaining pegs:", remaining)
-    for SAP in SAP_trace:
-        print(SAP)
-
-    remaining, SAP_trace = l4.test()
-
-    print("Remaining pegs:", remaining)
-    for SAP in SAP_trace:
-        print(SAP)
-
-    remaining, SAP_trace = l5.test()
-
-    print("Remaining pegs:", remaining)
-    for SAP in SAP_trace:
-        print(SAP)
+        end_time = time.time()
+        print("Time to train", settings["num_episodes"],
+              "episodes:", end_time - start_time)
+        
+        remaining, SAP_trace = l.test()
+        plt.clf()
+        print("Remaining pegs:", remaining)
+        for SAP in SAP_trace:
+            print(SAP)
+        """

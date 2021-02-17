@@ -69,12 +69,11 @@ class CriticANN:
         return tf.constant([[int(i) for i in state]],
                            dtype=tf.float64)
 
-    # @tf.function
     def calculate_temp_diff(self, new_state, curr_state, reinforcement):
         """
         diff = r + (discount * nn.forward(s') - nn.forward(s))
 
-        We use temp_diff as our loss function for ANN-critic
+        We use temp_diff as input to our loss function for ANN-critic
         """
 
         # Tensor operations seem to much faster, so using tensor to calc temp_diff
@@ -87,7 +86,6 @@ class CriticANN:
 
         return temp_diff.numpy()[0, 0]
 
-    # @tf.function
     def update_eligibility(self, gradients, decay_version=False):
         if not decay_version:
             for i, grad in enumerate(gradients):
@@ -123,7 +121,9 @@ class CriticANN:
         # we can make use of gradient tape. The tape watches variables involved in tensor operations
         # and has a method called gradient which computes the gradient for all watched variables
         # wrt to some function. In our case we want to compute the gradient of the loss function wrt
-        # the weights of the model.
+        # the weights of the model. Ideally we would be able to just use the temporal_difference which
+        # is already calculated, but tape requires that the variables to differentiate needs to be referenced
+        # in the indented block - therefore we need to recalculate V(s) and V(s')
         with tf.GradientTape() as tape:
             # We start by computing the target, which is the discounted value of the next state
             # with the added reinforcement

@@ -23,7 +23,7 @@ class Actor:
         # If we do a run outside of training and the model encounters
         # a state it has not yet seen
         if state not in self.policy:
-            print("Random")
+            print("Unseen state during test")
             return random.choice(legal_moves)
 
         if np.random.rand() >= self.e_greedy:
@@ -54,7 +54,7 @@ class Actor:
                 self.add_SAP(state, action)
 
     def update_greediness(self):
-
+        # Decays e_greedy proportionally with num_episodes
         self.e_greedy -= self.e_greedy_decay
 
     def update_policy(self, state, action, temporal_difference):
@@ -88,4 +88,4 @@ class Actor:
 
         for (state, action) in SAP_trace:
             self.update_policy(state, action, temporal_difference)
-            self.update_eligibility(state, action)
+            self.update_eligibility(state, action, decay_version=True)
